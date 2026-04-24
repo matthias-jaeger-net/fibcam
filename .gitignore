@@ -1,0 +1,10 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# VSCode settings
+.vscode/

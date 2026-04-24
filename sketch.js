@@ -2,9 +2,9 @@ let cam;
 let facingMode = "environment";
 
 let symetry = false;
-let fibMode = false;
+let fibMode = true;
 let fibSpiralOnPhoto = false;
-let fibDrawMode = 'all'; // 'all', 'spiral', 'squares'
+let fibDrawMode = "all"; // 'all', 'spiral', 'squares'
 let fibButtonClicked = false;
 let dragging = false;
 let dragSpiralIdx = -1;
@@ -20,8 +20,6 @@ const shutter = document.getElementById("shutter");
 const switchBtn = document.getElementById("switch-camera");
 const topBar = document.querySelector(".top-bar");
 const bottomBar = document.querySelector(".bottom-bar");
-const fibBtn = document.getElementById("fibonacci-squares");
-const gyroToggle = document.getElementById("gyro-toggle");
 
 const overlay = document.getElementById("photo-overlay");
 const overlayImage = document.getElementById("overlay-image");
@@ -35,14 +33,13 @@ const fibList = document.getElementById("fib-list-bar");
 const fibShutter = document.getElementById("fib-shutter");
 
 function hideFibUI() {
-    [fibControls, fibList, fibShutter, fibMessage].forEach(
+    [fibList, fibShutter, fibMessage].forEach(
         (el) => (el.style.display = "none"),
     );
     bottomBar.style.display = "";
 }
 
 function restoreFibUI() {
-    fibControls.style.display = "flex";
     if (spirals.length > 1) fibList.style.display = "flex";
     fibShutter.style.display = "block";
     bottomBar.style.display = "none";
@@ -175,7 +172,10 @@ fibControls.querySelector("#fib-mirror").onclick = (e) => {
 
 function centerSpiral(sp) {
     if (!sp.setup || sp.squares.length < 2) return;
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
     for (const sq of sp.squares) {
         const s = sq.size / 2;
         minX = Math.min(minX, sq.x - s);
@@ -193,7 +193,10 @@ function centerSpiral(sp) {
 
 function fitSpiral(sp) {
     if (!sp.setup || sp.squares.length < 2) return;
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
     for (const sq of sp.squares) {
         const s = sq.size / 2;
         minX = Math.min(minX, sq.x - s);
@@ -208,8 +211,10 @@ function fitSpiral(sp) {
     const bboxCX = (minX + maxX) / 2;
     const bboxCY = (minY + maxY) / 2;
     const xSign = sp.mirrored ? -1 : 1;
-    sp.setup.anchorX = window.innerWidth / 2 + xSign * (sp.setup.anchorX - bboxCX) * scale;
-    sp.setup.anchorY = window.innerHeight / 2 + (sp.setup.anchorY - bboxCY) * scale;
+    sp.setup.anchorX =
+        window.innerWidth / 2 + xSign * (sp.setup.anchorX - bboxCX) * scale;
+    sp.setup.anchorY =
+        window.innerHeight / 2 + (sp.setup.anchorY - bboxCY) * scale;
     sp.size = sp.size * scale;
     sp.squares = buildFibSquares(sp);
     focusOnSpiral(sp);
@@ -222,27 +227,53 @@ fibControls.querySelector("#fib-fit").onclick = (e) => {
 };
 
 fibControls.querySelector("#fib-on-photo").onclick = (e) => {
-    e.stopPropagation(); fibButtonClicked = true;
+    e.stopPropagation();
+    fibButtonClicked = true;
     fibSpiralOnPhoto = !fibSpiralOnPhoto;
     e.currentTarget.classList.toggle("active", fibSpiralOnPhoto);
     const modeGroup = document.getElementById("fib-overlay-mode");
-    modeGroup.style.display = fibSpiralOnPhoto ? "flex" : "none";
+    modeGroup.style.display = fibSpiralOnPhoto ? "block" : "none";
     if (!fibSpiralOnPhoto) {
-        fibDrawMode = 'all';
-        modeGroup.querySelectorAll(".fib-mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === 'all'));
+        fibDrawMode = "all";
     }
 };
 
-document.querySelectorAll(".fib-mode-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        fibButtonClicked = true;
-        fibDrawMode = btn.dataset.mode;
-        document.querySelectorAll(".fib-mode-btn").forEach(b => b.classList.toggle("active", b === btn));
-    });
+// Toggle handlers
+document.getElementById("toggle-squares").addEventListener("change", (e) => {
+    fibButtonClicked = true;
+    // Update draw mode based on toggle states
+    const squares = e.target.checked;
+    const spiral = document.getElementById("toggle-spiral").checked;
+    if (squares && spiral) {
+        fibDrawMode = "all";
+    } else if (spiral) {
+        fibDrawMode = "spiral";
+    } else if (squares) {
+        fibDrawMode = "squares";
+    }
 });
 
-const settingsBtn = document.getElementById("settings");
+document.getElementById("toggle-spiral").addEventListener("change", (e) => {
+    fibButtonClicked = true;
+    const squares = document.getElementById("toggle-squares").checked;
+    const spiral = e.target.checked;
+    if (squares && spiral) {
+        fibDrawMode = "all";
+    } else if (spiral) {
+        fibDrawMode = "spiral";
+    } else if (squares) {
+        fibDrawMode = "squares";
+    }
+});
+
+document.getElementById("toggle-all").addEventListener("change", (e) => {
+    fibButtonClicked = true;
+    if (e.target.checked) {
+        fibDrawMode = "all";
+        document.getElementById("toggle-squares").checked = true;
+        document.getElementById("toggle-spiral").checked = true;
+    }
+});
 
 function createDefaultSpiral() {
     const W = window.innerWidth;
@@ -250,15 +281,26 @@ function createDefaultSpiral() {
     // 9-square spiral bounding box is 34s wide × 55s tall (sq2DirIndex=1)
     const s = Math.min(W / 34, H / 55) * 0.9;
     const setup = { anchorX: W / 2, anchorY: H / 2, sq2DirIndex: 1, count: 9 };
-    const sp = { squares: [], setup, size: s, mirrored: false, label: String.fromCharCode(nextLabelCode++) };
+    const sp = {
+        squares: [],
+        setup,
+        size: s,
+        mirrored: false,
+        label: String.fromCharCode(nextLabelCode++),
+    };
     sp.squares = buildFibSquares(sp);
 
     // Centre the bbox on screen
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
     for (const sq of sp.squares) {
         const hs = sq.size / 2;
-        minX = Math.min(minX, sq.x - hs); minY = Math.min(minY, sq.y - hs);
-        maxX = Math.max(maxX, sq.x + hs); maxY = Math.max(maxY, sq.y + hs);
+        minX = Math.min(minX, sq.x - hs);
+        minY = Math.min(minY, sq.y - hs);
+        maxX = Math.max(maxX, sq.x + hs);
+        maxY = Math.max(maxY, sq.y + hs);
     }
     sp.setup.anchorX += W / 2 - (minX + maxX) / 2;
     sp.setup.anchorY += H / 2 - (minY + maxY) / 2;
@@ -270,112 +312,6 @@ function focusOnSpiral(sp) {
     if (!sp || sp.squares.length === 0) return;
     setFocusPoint(sp.squares[0].x, sp.squares[0].y);
 }
-
-fibBtn.onclick = () => {
-    fibMode = !fibMode;
-    fibBtn.classList.toggle("active", fibMode);
-
-    if (fibMode) {
-        nextLabelCode = 65;
-        spirals = [createDefaultSpiral()];
-        activeIdx = 0;
-        topBar.style.display = "none";
-        switchBtn.style.display = "none";
-        settingsBtn.style.display = "none";
-        fibControls.style.display = "flex";
-        fibShutter.style.display = "block";
-        shutter.style.display = "none";
-        updateFibList();
-        fitSpiral(spirals[0]);
-    } else {
-        hideFibUI();
-        spirals = [];
-        activeIdx = -1;
-        fibSpiralOnPhoto = false;
-        fibControls.querySelector("#fib-on-photo").classList.remove("active");
-        switchBtn.style.display = "";
-        settingsBtn.style.display = "";
-        shutter.style.display = "";
-    }
-};
-
-// Motion/tilt variables (from accelerometer gravity vector)
-let gyroEnabled = false;
-let accelX = 0; // left/right tilt (+right, -left)
-let accelY = -9.8; // up/down (upright ≈ -9.8)
-let accelZ = 0; // forward/back tilt
-let hasGyro = false;
-
-// Check if device requires explicit motion permission (iOS 13+)
-function checkGyroSupport() {
-    return (
-        typeof DeviceMotionEvent !== "undefined" &&
-        typeof DeviceMotionEvent.requestPermission === "function"
-    );
-}
-
-// Auto-request motion permission on app load
-async function requestGyroPermission() {
-    if (checkGyroSupport()) {
-        try {
-            const permission = await DeviceMotionEvent.requestPermission();
-            if (permission === "granted") {
-                hasGyro = true;
-                console.log("Motion permission granted automatically");
-            }
-        } catch (error) {
-            console.log("Motion permission not available");
-        }
-    } else {
-        // Non-iOS or older devices - assume support
-        hasGyro = true;
-        console.log("Motion assumed available");
-    }
-}
-
-// Gyroscope toggle
-if (gyroToggle) {
-    gyroToggle.onclick = async () => {
-        if (!hasGyro) {
-            // Request permission first (must be in response to user tap)
-            if (checkGyroSupport()) {
-                try {
-                    const permission =
-                        await DeviceMotionEvent.requestPermission();
-                    if (permission === "granted") {
-                        hasGyro = true;
-                        console.log("Gyroscope permission granted");
-                        // Now enable gyro after permission
-                        gyroEnabled = true;
-                        gyroToggle.classList.toggle("active", true);
-                    }
-                } catch (error) {
-                    console.log("Gyroscope permission denied");
-                }
-            } else {
-                // Non-iOS or older devices - assume support
-                hasGyro = true;
-                gyroEnabled = true;
-                gyroToggle.classList.toggle("active", true);
-            }
-        } else {
-            // Already have permission, just toggle
-            gyroEnabled = !gyroEnabled;
-            gyroToggle.classList.toggle("active", gyroEnabled);
-            console.log("Gyroscope toggled:", gyroEnabled);
-        }
-    };
-}
-
-// Listen for accelerometer gravity vector
-window.addEventListener("devicemotion", (event) => {
-    const g = event.accelerationIncludingGravity;
-    if (g) {
-        accelX = g.x || 0;
-        accelY = g.y || 0;
-        accelZ = g.z || 0;
-    }
-});
 
 function initCamera() {
     if (cam) cam.remove();
@@ -421,6 +357,20 @@ function setup() {
     const c = createCanvas(window.innerWidth, window.innerHeight);
     c.parent("camera-container");
     initCamera();
+
+    // Initialize Fibonacci mode
+    nextLabelCode = 65;
+    spirals = [createDefaultSpiral()];
+    activeIdx = 0;
+    topBar.style.display = "none";
+    fibShutter.style.display = "block";
+    shutter.style.display = "none";
+
+    // Initialize fib-overlay-mode to be hidden (will show when fib-on-photo is toggled)
+    document.getElementById("fib-overlay-mode").style.display = "none";
+
+    updateFibList();
+    fitSpiral(spirals[0]);
 }
 
 function draw() {
@@ -450,14 +400,6 @@ function draw() {
 
     let imgX = width / 2 - w / 2;
     let imgY = height / 2 - h / 2;
-
-    // Apply pan effect based on gravity vector
-    if (gyroEnabled && hasGyro) {
-        let panX = map(accelX, -9.8, 9.8, -30, 30, true);
-        let panY = map(accelZ, -9.8, 9.8, -30, 30, true);
-        imgX += panX;
-        imgY += panY;
-    }
 
     if (!symetry) {
         image(cam, 0, 0, w, h);
@@ -493,11 +435,18 @@ function draw() {
                     translate(2 * sp.setup.anchorX, 0);
                     scale(-1, 1);
                 }
-                const showSquares = !fibSpiralOnPhoto || fibDrawMode !== 'spiral';
-                const showSpiral = !fibSpiralOnPhoto || fibDrawMode !== 'squares';
+                const showSquares =
+                    !fibSpiralOnPhoto || fibDrawMode !== "spiral";
+                const showSpiral =
+                    !fibSpiralOnPhoto || fibDrawMode !== "squares";
                 if (showSquares) {
                     for (const sq of sp.squares) {
-                        rect(sq.x, sq.y, sq.size || sp.size, sq.size || sp.size);
+                        rect(
+                            sq.x,
+                            sq.y,
+                            sq.size || sp.size,
+                            sq.size || sp.size,
+                        );
                     }
                 }
                 if (showSpiral && sp.squares.length >= 3) drawFibSpiral(sp);
@@ -514,40 +463,6 @@ function draw() {
     line((2 * width) / 3, 0, (2 * width) / 3, height);
     line(0, height / 3, width, height / 3);
     line(0, (2 * height) / 3, width, (2 * height) / 3);
-
-    // Draw gyroscope level indicator
-    if (gyroEnabled && hasGyro) {
-        drawLevelIndicator();
-    }
-}
-
-function drawLevelIndicator() {
-    let centerX = width / 2;
-    let centerY = height / 2;
-    let lineLength = 100;
-
-    // Derive roll angle from gravity vector (left/right tilt)
-    // atan2(x, -y): 0° = upright, positive = tilted right
-    let rollAngle = atan2(accelX, -accelY);
-
-    // Blue vertical line rotating with physical roll angle
-    push();
-    translate(centerX, centerY);
-    rotate(rollAngle);
-    stroke(0, 120, 255);
-    strokeWeight(3);
-    line(0, -lineLength, 0, lineLength);
-    pop();
-
-    // Numeric tilt value (left side, vertically centred)
-    push();
-    textSize(14);
-    textFont("monospace");
-    noStroke();
-    fill(0, 120, 255);
-    let tiltDeg = degrees(rollAngle);
-    text(`tilt ${nf(tiltDeg, 1, 1)}°`, 12, height / 2);
-    pop();
 }
 
 function drawOverlays(ctx, w, h, imgX, imgY, canvasW, canvasH) {
@@ -594,43 +509,6 @@ function drawOverlays(ctx, w, h, imgX, imgY, canvasW, canvasH) {
                 }
             }
         }
-    }
-
-    // Draw gyroscope level indicator
-    if (gyroEnabled && hasGyro) {
-        const centerX = canvasW / 2;
-        const centerY = canvasH / 2;
-        const radius = 40;
-
-        // Draw circle
-        ctx.strokeStyle = "rgba(0, 120, 255, 0.8)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Draw horizontal line
-        ctx.strokeStyle = "rgba(0, 120, 255, 0.5)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(centerX - radius, centerY);
-        ctx.lineTo(centerX + radius, centerY);
-        ctx.stroke();
-
-        // Draw vertical line
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY - radius);
-        ctx.lineTo(centerX, centerY + radius);
-        ctx.stroke();
-
-        // Draw tilt indicator
-        const rollAngle = atan2(accelX, accelY);
-        const tiltX = centerX + radius * 0.6 * sin(rollAngle);
-        const tiltY = centerY + radius * 0.6 * cos(rollAngle);
-        ctx.fillStyle = "rgba(0, 170, 255, 0.8)";
-        ctx.beginPath();
-        ctx.arc(tiltX, tiltY, 4, 0, Math.PI * 2);
-        ctx.fill();
     }
 }
 
@@ -813,7 +691,7 @@ async function takePhoto() {
         ctx.strokeStyle = "rgba(0, 170, 255, 1)";
         ctx.lineWidth = 2;
 
-        if (fibDrawMode !== 'spiral') {
+        if (fibDrawMode !== "spiral") {
             for (const sp of spirals) {
                 if (!sp.setup || sp.squares.length === 0) continue;
                 for (const sq of sp.squares) {
@@ -823,12 +701,12 @@ async function takePhoto() {
             }
         }
 
-        if (fibDrawMode !== 'squares') {
+        if (fibDrawMode !== "squares") {
             const arcDef = [
-                { dx:  0.5, dy:  0.5, a1: Math.PI,       a2: Math.PI * 1.5 },
-                { dx: -0.5, dy:  0.5, a1: Math.PI * 1.5, a2: Math.PI * 2   },
-                { dx: -0.5, dy: -0.5, a1: 0,              a2: Math.PI * 0.5 },
-                { dx:  0.5, dy: -0.5, a1: Math.PI * 0.5, a2: Math.PI       },
+                { dx: 0.5, dy: 0.5, a1: Math.PI, a2: Math.PI * 1.5 },
+                { dx: -0.5, dy: 0.5, a1: Math.PI * 1.5, a2: Math.PI * 2 },
+                { dx: -0.5, dy: -0.5, a1: 0, a2: Math.PI * 0.5 },
+                { dx: 0.5, dy: -0.5, a1: Math.PI * 0.5, a2: Math.PI },
             ];
             ctx.beginPath();
             for (const sp of spirals) {
@@ -836,7 +714,10 @@ async function takePhoto() {
                 const { sq2DirIndex } = sp.setup;
                 const dirs = [(sq2DirIndex + 2) % 4, (sq2DirIndex + 1) % 4];
                 let d = (sq2DirIndex - 1 + 4) % 4;
-                for (let i = 2; i < sp.squares.length; i++) { dirs.push(d); d = (d + 1) % 4; }
+                for (let i = 2; i < sp.squares.length; i++) {
+                    dirs.push(d);
+                    d = (d + 1) % 4;
+                }
                 for (let i = 0; i < sp.squares.length; i++) {
                     const sq = sp.squares[i];
                     const s = sq.size;
@@ -855,7 +736,10 @@ async function takePhoto() {
 
     overlayImage.src = dataUrl;
     overlay.classList.add("active");
-    if (fibMode) hideFibUI();
+    if (fibMode) {
+        hideFibUI();
+        topBar.style.display = "";
+    }
 
     const res = await fetch(dataUrl);
     const blob = await res.blob();
@@ -871,7 +755,6 @@ async function takePhoto() {
 }
 
 shutter.onclick = takePhoto;
-
 
 switchBtn.onclick = () => {
     facingMode = facingMode === "environment" ? "user" : "environment";

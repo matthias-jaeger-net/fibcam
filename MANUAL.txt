@@ -7,9 +7,8 @@ CAMERA MODE
 The app opens in camera mode showing a live camera feed.
 
 TOP BAR:
-  Gyro toggle         (left)   — toggles gyroscope orientation guide
-  Settings button     (middle) — toggles overlay saving in photos
-  Switch camera       (right)  — toggles front/back camera
+  Settings button     (left)  — toggles overlay saving in photos
+  Switch camera       (right) — toggles front/back camera
 
 BOTTOM BAR:
   Shutter button (centre) — takes a photo
@@ -17,7 +16,6 @@ BOTTOM BAR:
 OVERLAYS:
   When overlays are enabled (via Settings), the following appear on the camera:
     • Rule of thirds grid lines
-    • Gyroscope level indicator (when gyro is enabled)
     • Fibonacci squares and spirals (when in Fibonacci mode)
 
 AFTER TAKING A PHOTO:
@@ -78,4 +76,3 @@ To include them, toggle the Settings button before taking the photo.
 When overlays are enabled, the photo will include:
   • The Fibonacci squares and spirals
   • Rule of thirds grid lines
-  • Any active gyroscope indicator

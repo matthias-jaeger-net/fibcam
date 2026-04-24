@@ -14,23 +14,7 @@
 
     <body>
         <div id="camera-container">
-            <button id="fibonacci-squares">
-                <img src="img/square.svg" alt="Fibonacci Squares" />
-            </button>
-            <div class="top-bar">
-                <button id="gyro-toggle" title="Toggle Gyroscope Effects">
-                    <img
-                        src="img/separator-vertical.svg"
-                        alt="Gyroscope Toggle"
-                    />
-                </button>
-                <button id="settings">
-                    <img src="img/settings.svg" alt="Settings" />
-                </button>
-                <button id="switch-camera">
-                    <img src="img/switch-camera.svg" alt="Switch Camera" />
-                </button>
-            </div>
+            <div class="top-bar"></div>
             <div class="bottom-bar">
                 <button id="shutter"></button>
             </div>
@@ -54,6 +38,9 @@
         <div id="fib-message">place the centre of the fibonacci squares</div>
         <div id="fib-list-bar"></div>
         <div id="fib-controls-bar">
+            <button id="switch-camera">
+                <img src="img/switch-camera.svg" alt="Switch Camera" />
+            </button>
             <button id="fib-minus">−</button>
             <button id="fib-plus">
                 <img src="img/plus.svg" alt="Increase" />
@@ -62,14 +49,23 @@
             <button id="fib-mirror">
                 <img src="img/flip-horizontal-2.svg" alt="Mirror" />
             </button>
-<button id="fib-fit">
-                <img src="img/expand.svg" alt="Fit" />
-            </button>
             <button id="fib-on-photo">overlay</button>
             <div id="fib-overlay-mode">
-                <button class="fib-mode-btn active" data-mode="all">All</button>
-                <button class="fib-mode-btn" data-mode="spiral">Spiral</button>
-                <button class="fib-mode-btn" data-mode="squares">Squares</button>
+                <div id="overlay-modal">
+                    <h3>Overlay Options</h3>
+                    <div class="toggle-item">
+                        <label for="toggle-squares">Squares</label>
+                        <input type="checkbox" id="toggle-squares" checked />
+                    </div>
+                    <div class="toggle-item">
+                        <label for="toggle-spiral">Spiral</label>
+                        <input type="checkbox" id="toggle-spiral" checked />
+                    </div>
+                    <div class="toggle-item">
+                        <label for="toggle-all">Show All</label>
+                        <input type="checkbox" id="toggle-all" checked />
+                    </div>
+                </div>
             </div>
         </div>
         <button id="fib-shutter"></button>
