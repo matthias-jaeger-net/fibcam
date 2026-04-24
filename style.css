@@ -1,0 +1,370 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overflow: hidden;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #000;
+    color: #fff;
+}
+
+#camera-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh; /* fallback */
+    height: 100dvh; /* modern fix */
+}
+
+/* Canvas fills screen */
+canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+/* Fibonacci squares */
+#fibonacci-squares {
+    position: absolute;
+    top: calc(16px + env(safe-area-inset-top));
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+
+#fibonacci-squares.active {
+    background: rgba(0, 170, 255, 0.4);
+    border-color: #0af;
+}
+
+/* 🔻 Bottom bar */
+.bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+    padding-bottom: calc(
+        32px + env(safe-area-inset-bottom)
+    ); /* iPhone safe area */
+
+    z-index: 10;
+
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+}
+
+/* Buttons (base) */
+.bottom-bar button {
+    width: 60px;
+    height: 60px;
+
+    border-radius: 50%;
+    border: none;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+
+    color: #0af;
+    font-size: 22px;
+
+    cursor: pointer;
+}
+
+img {
+    width: 24px;
+    height: 24px;
+    fill: #0af;
+}
+
+/* Settings button (shows when overlays are enabled) */
+#settings {
+    transition:
+        background-color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+/* 📸 Shutter (center emphasis) */
+#shutter {
+    width: 80px;
+    height: 80px;
+
+    border: 4px solid #0af;
+    background: rgba(0, 170, 255, 0.3);
+}
+
+/* Fib control and list buttons */
+#fib-controls-bar button,
+#fib-list-bar button {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 6px;
+    padding: 6px 12px;
+}
+
+/* Fib shutter */
+#fib-shutter {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 4px solid #0af;
+    background: rgba(0, 170, 255, 0.3);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Press feedback */
+#shutter:active,
+#fib-shutter:active {
+    transform: scale(0.92);
+    background: #0af;
+}
+
+/* Flash effect */
+#flash {
+    position: absolute;
+    inset: 0;
+    background: #0af;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 20;
+}
+
+/* Overlay */
+#photo-overlay {
+    position: fixed;
+    inset: 0;
+    background: black;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+
+    z-index: 999;
+}
+
+#photo-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Image preview */
+#overlay-image {
+    width: 80%;
+    height: auto;
+
+    border-radius: 12px;
+    border: 1px solid #0af;
+}
+
+/* Overlay controls */
+.overlay-controls {
+    width: 100%;
+    max-width: 500px;
+
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+/* Buttons / links */
+a,
+button {
+    color: #0af;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* 🔝 Top bar */
+.top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 20px;
+    padding-top: calc(20px + env(safe-area-inset-top)); /* iPhone safe area */
+    gap: 10px;
+
+    z-index: 10;
+
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
+}
+
+/* Gyroscope buttons */
+.top-bar button {
+    width: 50px;
+    height: 50px;
+
+    border-radius: 50%;
+    border: none;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+
+    color: #0af;
+    font-size: 20px;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.top-bar button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.top-bar button:active {
+    transform: scale(0.92);
+}
+
+#gyro-toggle.active {
+    background: rgba(0, 170, 255, 0.4);
+    border: 2px solid #0af;
+}
+
+#gyro-permission:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Fibonacci message */
+#fib-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 16px;
+    z-index: 1000;
+    pointer-events: none;
+    display: none;
+    white-space: nowrap;
+}
+
+/* Fibonacci list bar */
+#fib-list-bar {
+    position: fixed;
+    top: calc(16px + env(safe-area-inset-top));
+    left: 16px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+#fib-list-bar button {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #0af;
+    cursor: pointer;
+    border: none;
+}
+
+/* Fibonacci controls bar */
+#fib-controls-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    padding-left: calc(16px + env(safe-area-inset-left));
+    gap: 14px;
+    z-index: 1000;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.5), transparent);
+}
+
+#fib-controls-bar button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: #0af;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#fib-controls-bar button img {
+    width: 20px;
+    height: 20px;
+}
+
+#fib-controls-bar button:active {
+    transform: scale(0.92);
+}
+
+#fib-on-photo.active {
+    background: rgba(0, 170, 255, 0.4);
+    border: 2px solid #0af;
+}
+
+#fib-overlay-mode {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fib-mode-btn {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 10px !important;
+    border-radius: 6px !important;
+    border: 2px solid transparent !important;
+}
+
+.fib-mode-btn.active {
+    background: rgba(0, 170, 255, 0.4) !important;
+    border-color: #0af !important;
+}

@@ -1,0 +1,81 @@
+CAM — USER MANUAL
+=================
+
+
+CAMERA MODE
+-----------
+The app opens in camera mode showing a live camera feed.
+
+TOP BAR:
+  Gyro toggle         (left)   — toggles gyroscope orientation guide
+  Settings button     (middle) — toggles overlay saving in photos
+  Switch camera       (right)  — toggles front/back camera
+
+BOTTOM BAR:
+  Shutter button (centre) — takes a photo
+
+OVERLAYS:
+  When overlays are enabled (via Settings), the following appear on the camera:
+    • Rule of thirds grid lines
+    • Gyroscope level indicator (when gyro is enabled)
+    • Fibonacci squares and spirals (when in Fibonacci mode)
+
+AFTER TAKING A PHOTO:
+  An overlay shows the captured image.
+  Download button (top left)  — saves the photo
+  Close button    (top right) — returns to camera
+
+
+FIBONACCI SQUARES MODE
+----------------------
+Press the Fibonacci button (top left corner) to enter Fibonacci mode.
+The top bar changes to show Fibonacci controls.
+The bottom-bar shutter button stays in the same position.
+
+-- Placing the first square --
+A guide square appears in the centre of the screen.
+Tap anywhere to place the centre of the first square.
+A message appears asking to "place the centre of the fibonacci squares".
+
+-- Placing the second square --
+Tap on any of the 4 sides of the first square to place the second
+square. The direction you choose determines the orientation of the
+spiral.
+
+-- Adding more squares --
+Each tap adds the next Fibonacci square. Squares grow following the
+Fibonacci sequence (1, 1, 2, 3, 5, 8, 13 ...) and automatically
+arrange into a spiral.
+
+-- Controls (top bar during Fibonacci mode) --
+  −         decrease the size of the active spiral
+  +         increase the size of the active spiral
+  ↻         rotate the spiral direction 90° (cycles through 4 directions)
+  mirror    flip the spiral horizontally
+  new       freeze the current spiral and start a new one
+  delete    delete the active spiral
+  fit       scale and centre the active spiral so it fills the screen
+
+-- Spiral list (top left, appears when 2+ spirals exist) --
+Spirals are labelled A, B, C ...
+Tap a label to select and edit that spiral.
+The active spiral is shown at full brightness; others are dimmed.
+Deleting a spiral keeps the remaining labels unchanged
+(e.g. deleting A from [A, B, C] leaves [B, C]).
+
+-- Spiral arc --
+After placing 3 or more squares, the Fibonacci spiral arc is drawn
+inside the squares as a continuous quarter-circle curve.
+
+-- Moving a spiral --
+Tap and drag anywhere within the bounding box of the spiral to
+reposition it.
+
+-- Taking a photo --
+Press the shutter button to capture the scene.
+By default, spiral overlays are NOT included in the photo.
+To include them, toggle the Settings button before taking the photo.
+When overlays are enabled, the photo will include:
+  • The Fibonacci squares and spirals
+  • Rule of thirds grid lines
+  • Any active gyroscope indicator

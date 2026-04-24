@@ -1,0 +1,131 @@
+CAM — CODE EXPLAINED
+====================
+Feature-by-feature explanation of sketch.js
+
+
+1. CAMERA FEED
+--------------
+initCamera() uses p5.js createCapture() to access the device camera.
+setup() creates a full-screen canvas and calls it. In draw(), the video
+frame is scaled to cover the canvas (like CSS object-fit: cover), and
+mirrored horizontally when using the front camera. The rule-of-thirds
+grid lines are drawn on top every frame.
+
+
+2. TAKING A PHOTO
+-----------------
+takePhoto() draws the camera video element onto a temporary off-screen
+canvas — without spirals or grid lines. It then converts that to a PNG
+data URL, shows the photo overlay, and tries to trigger the native share
+sheet (navigator.share). The download link is also updated as a fallback.
+
+
+3. FIBONACCI MODE ENTRY
+-----------------------
+Pressing the top-right button sets fibMode = true, hides the bottom bar,
+creates the first spiral object { squares:[], setup:null, size, label:'A' },
+and shows the "place the centre" message.
+
+
+4. SPIRAL DATA STRUCTURE
+------------------------
+Each spiral is stored as:
+  squares      — array of {x, y, size} centre positions
+  setup        — { anchorX, anchorY, sq2DirIndex, count }
+                 the fixed touch point between sq1/sq2, the direction
+                 sq2 was placed, and how many squares exist
+  size         — the base unit size (sq1 and sq2 size)
+  label        — letter A, B, C ...
+
+
+5. PLACING SQUARES
+------------------
+mousePressed() handles three stages:
+
+  sq1   stores the tap position as the first square
+
+  sq2   determines which of the 4 sides was tapped (by comparing dx vs dy),
+        stores the anchor point (midpoint of the shared edge between sq1
+        and sq2), and calls buildFibSquares()
+
+  sq3+  increments setup.count and calls buildFibSquares()
+
+
+6. BUILDING THE SPIRAL — buildFibSquares()
+------------------------------------------
+This is the core algorithm. Given the anchor and direction of sq2, it:
+
+  1. Reconstructs sq1 and sq2 positions from the anchor
+  2. Tracks a growing bounding box of all placed squares
+  3. For each additional square:
+       size      = sum of previous two (Fibonacci sequence)
+       direction = rotates 90° clockwise each step
+       centre    = placed just outside the current bounding box on that side
+  4. Returns the complete array of squares with positions and sizes
+
+
+7. RESIZING — +/− BUTTONS
+--------------------------
+Updates sp.size (the base unit) and calls buildFibSquares(). Because all
+positions are derived from the fixed anchor and the base size, the entire
+spiral rebuilds correctly — the shared edge between sq1 and sq2 stays
+fixed while squares grow/shrink outward.
+
+
+8. ROTATING THE SPIRAL — ↻ BUTTON
+-----------------------------------
+Computes sq1's position from the anchor, rotates sq2DirIndex by 1
+(cycling through the 4 directions), recalculates the anchor based on the
+new direction from sq1, then rebuilds. This cycles the spiral through all
+4 orientations while keeping sq1 fixed.
+
+
+9. MULTIPLE SPIRALS — new / del / list
+---------------------------------------
+"new" pushes a fresh spiral object to the spirals array and sets it as
+active. "del" removes it with splice(). Labels (A, B, C ...) are assigned
+at creation from nextLabelCode and never reassigned, so deleting A leaves
+B and C unchanged. The list UI re-renders on every change via
+updateFibList().
+
+
+10. DRAGGING A SPIRAL
+---------------------
+insideGrabArea() checks if the tap is within the full bounding box of all
+squares in the spiral. If so, mousePressed() starts a drag: records which
+spiral and the offset from the anchor to the tap. mouseDragged() updates
+the anchor position each frame and rebuilds the spiral. mouseReleased()
+clears the drag state.
+
+
+11. DRAWING SPIRALS — p5 CANVAS
+---------------------------------
+Spirals are drawn directly on the p5 canvas each frame in draw(). Active
+spirals are bright blue; others are faded. The control buttons have opaque
+backgrounds (via CSS backdrop-filter) so spiral lines behind them are
+hidden, keeping labels readable.
+
+
+12. SPIRAL ARC — drawFibSpiral()
+----------------------------------
+Once a spiral has 3+ squares, drawFibSpiral() draws the Fibonacci spiral
+curve as a series of quarter-circle arcs — one per square.
+
+Each arc is a 90° arc of radius = square side length, centred at one
+corner of the square (the "inner" corner facing the centre of the spiral).
+The corner and angle range are looked up from a table indexed by the
+direction the square was placed (UP/RIGHT/DOWN/LEFT).
+
+The two innermost squares (sq1, sq2) use derived directions so their arcs
+connect seamlessly: together they form a semicircle. From sq3 onward the
+arc directions come directly from the buildFibSquares loop. Each arc's
+endpoint equals the next arc's start point, producing one continuous curve.
+
+
+13. FIT BUTTON
+--------------
+The "fit" button scales the active spiral to fill the screen and centres
+it. It measures the bounding box of all squares, computes the scale factor
+needed to fit within the screen dimensions, scales sp.size accordingly,
+and offsets the anchor so the bounding box centre lands at the screen
+centre. buildFibSquares() then rebuilds everything at the new size.
