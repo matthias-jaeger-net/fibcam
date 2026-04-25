@@ -4,10 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Cam</title>
-        <meta
-            name="apple-mobile-web-app-status-bar-style"
-            content="black-translucent"
-        />
+
         <script src="https://cdn.jsdelivr.net/npm/p5@1.11.11/lib/p5.js"></script>
         <link rel="stylesheet" href="style.css" />
     </head>
@@ -15,6 +12,7 @@
     <body>
         <div id="camera-container">
             <div class="top-bar"></div>
+
             <div class="bottom-bar">
                 <button id="shutter"></button>
             </div>
@@ -22,52 +20,56 @@
 
         <div id="flash"></div>
 
+        <!-- Overlay -->
         <div id="photo-overlay">
             <div class="overlay-controls">
                 <a id="download" download="photo.png">
-                    <img src="img/download.svg" alt="Download" />
+                    <img src="img/download.svg" />
                 </a>
                 <a id="close">
-                    <img src="img/close.svg" alt="Close" />
+                    <img src="img/close.svg" />
                 </a>
             </div>
             <img id="overlay-image" />
         </div>
 
-        <!-- Fibonacci UI Elements -->
+        <!-- Fibonacci UI -->
         <div id="fib-message">place the centre of the fibonacci squares</div>
         <div id="fib-list-bar"></div>
+
         <div id="fib-controls-bar">
             <button id="switch-camera">
-                <img src="img/switch-camera.svg" alt="Switch Camera" />
+                <img src="img/switch-camera.svg" />
             </button>
+
             <button id="fib-minus">−</button>
             <button id="fib-plus">
-                <img src="img/plus.svg" alt="Increase" />
+                <img src="img/plus.svg" />
             </button>
             <button id="fib-spin">↻</button>
             <button id="fib-mirror">
-                <img src="img/flip-horizontal-2.svg" alt="Mirror" />
+                <img src="img/flip-horizontal-2.svg" />
             </button>
+
             <button id="fib-on-photo">overlay</button>
+
             <div id="fib-overlay-mode">
                 <div id="overlay-modal">
                     <h3>Overlay Options</h3>
-                    <div class="toggle-item">
-                        <label for="toggle-squares">Squares</label>
+
+                    <label>
+                        Squares
                         <input type="checkbox" id="toggle-squares" checked />
-                    </div>
-                    <div class="toggle-item">
-                        <label for="toggle-spiral">Spiral</label>
+                    </label>
+
+                    <label>
+                        Spiral
                         <input type="checkbox" id="toggle-spiral" checked />
-                    </div>
-                    <div class="toggle-item">
-                        <label for="toggle-all">Show All</label>
-                        <input type="checkbox" id="toggle-all" checked />
-                    </div>
+                    </label>
                 </div>
             </div>
         </div>
+
         <button id="fib-shutter"></button>
 
         <script src="sketch.js"></script>

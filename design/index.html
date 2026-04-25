@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Camera UI</title>
+
+        <style>
+            :root {
+                --bg: #2b2a2a;
+                --fg: #ffffff;
+                --accent: #d5ff17;
+
+                --bg-interactive: #ffffff22;
+                --bg-interactive-hover: #ffffff33;
+
+                --border: 1px solid #ffffff55;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                height: 100%;
+            }
+
+            body {
+                display: flex;
+                flex-direction: column;
+                background: var(--bg);
+                color: var(--fg);
+                font-family: system-ui, sans-serif;
+            }
+
+            /* ===== Layout ===== */
+            .bar {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .top-bar {
+                justify-content: center;
+            }
+
+            .bottom-bar {
+                justify-content: space-around;
+            }
+
+            .camera-container {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .camera-placeholder {
+                width: 100%;
+                height: 100%;
+                background: #000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #ffffff66;
+            }
+
+            /* ===== FLASH OVERLAY ===== */
+            .flash {
+                position: absolute;
+                inset: 0;
+                background: var(--accent);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.15s ease;
+                mix-blend-mode: screen;
+            }
+
+            .flash.active {
+                opacity: 0.9;
+            }
+
+            /* ===== Base buttons ===== */
+            .btn {
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
+                border: var(--border);
+                background: var(--bg-interactive);
+                cursor: pointer;
+                position: relative;
+                transition: 0.15s ease;
+                color: var(--fg);
+            }
+
+            .btn:hover {
+                background: var(--bg-interactive-hover);
+            }
+
+            .btn::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                margin: auto;
+                width: 24px;
+                height: 24px;
+
+                background-color: currentColor;
+
+                mask: var(--icon) center / contain no-repeat;
+                -webkit-mask: var(--icon) center / contain no-repeat;
+            }
+
+            .btn.active {
+                color: var(--accent);
+                border-color: var(--accent);
+            }
+
+            .btn:active {
+                color: var(--accent);
+                border: var(--accent);
+                transform: scale(0.95);
+            }
+
+            /* ===== Shutter ===== */
+            .shutter {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                border: var(--border);
+                background: var(--bg-interactive);
+                cursor: pointer;
+                transition: 0.15s ease;
+            }
+
+            .shutter:active {
+                background: var(--accent);
+            }
+
+            /* ===== ICONS ===== */
+            .btn.increase-density {
+                --icon: url("icons/plus(1).svg");
+            }
+            .btn.decrease-density {
+                --icon: url("icons/minus.svg");
+            }
+            .btn.flip {
+                --icon: url("icons/flip-vertical.svg");
+            }
+            .btn.rotate {
+                --icon: url("icons/rotate-clockwise.svg");
+            }
+            .btn.settings {
+                --icon: url("icons/settings.svg");
+            }
+            .btn.switch-camera {
+                --icon: url("icons/camera-rotate.svg");
+            }
+
+            /* ===== SETTINGS WRAPPER ===== */
+            .settings-wrapper {
+                position: relative;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .settings-panel {
+                position: absolute;
+                bottom: 90px;
+
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+
+                padding: 12px;
+                border: var(--border);
+                border-radius: 999px;
+
+                background: #1f1f1fdd;
+                backdrop-filter: blur(10px);
+
+                opacity: 0;
+                transform: translateY(10px);
+                pointer-events: none;
+
+                transition: 0.2s ease;
+            }
+
+            .settings-panel.open {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .settings-item {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                border: var(--border);
+                background: var(--bg-interactive);
+                cursor: pointer;
+                position: relative;
+                color: var(--fg);
+            }
+
+            .settings-item::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                margin: auto;
+                width: 22px;
+                height: 22px;
+
+                background-color: currentColor;
+
+                mask: var(--icon) center / contain no-repeat;
+                -webkit-mask: var(--icon) center / contain no-repeat;
+            }
+
+            .settings-item.active {
+                color: var(--accent);
+                border-color: var(--accent);
+            }
+
+            .grid {
+                --icon: url("icons/square-plus-2.svg");
+            }
+            .spiral {
+                --icon: url("icons/spiral.svg");
+            }
+            .photo {
+                --icon: url("icons/question-mark.svg");
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- TOP -->
+        <div class="bar top-bar">
+            <button
+                class="btn decrease-density"
+                data-action="decrease-density"
+            ></button>
+            <button
+                class="btn increase-density"
+                data-action="increase-density"
+            ></button>
+            <button class="btn flip" data-action="flip"></button>
+            <button class="btn rotate" data-action="rotate"></button>
+        </div>
+
+        <!-- CAMERA -->
+        <div class="camera-container">
+            <div class="camera-placeholder">Camera Preview</div>
+            <div class="flash" id="flash"></div>
+        </div>
+
+        <!-- BOTTOM -->
+        <div class="bar bottom-bar">
+            <div class="settings-wrapper">
+                <button class="btn settings" data-action="settings"></button>
+
+                <div class="settings-panel" id="settingsPanel">
+                    <button
+                        class="settings-item grid active"
+                        data-toggle="grid"
+                    ></button>
+                    <button
+                        class="settings-item spiral active"
+                        data-toggle="spiral"
+                    ></button>
+                    <button
+                        class="settings-item photo"
+                        data-toggle="photo"
+                    ></button>
+                </div>
+            </div>
+
+            <button class="shutter" data-action="shutter"></button>
+            <button
+                class="btn switch-camera"
+                data-action="switch-camera"
+            ></button>
+        </div>
+
+        <!-- SCRIPT -->
+        <script>
+            const settingsBtn = document.querySelector(
+                '[data-action="settings"]',
+            );
+            const panel = document.getElementById("settingsPanel");
+
+            const shutterBtn = document.querySelector(
+                '[data-action="shutter"]',
+            );
+            const flash = document.getElementById("flash");
+
+            // toggle settings panel
+            settingsBtn.addEventListener("click", () => {
+                settingsBtn.classList.toggle("active");
+                panel.classList.toggle("open");
+            });
+
+            // toggle settings items
+            document.querySelectorAll("[data-toggle]").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    btn.classList.toggle("active");
+                });
+            });
+
+            // flash effect on shutter
+            shutterBtn.addEventListener("click", () => {
+                flash.classList.add("active");
+
+                setTimeout(() => {
+                    flash.classList.remove("active");
+                }, 150);
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Fibonacci Camera</title>
+
+        <script src="https://cdn.jsdelivr.net/npm/p5@1.11.11/lib/p5.js"></script>
+
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background: #000;
+                font-family: sans-serif;
+            }
+            canvas {
+                display: block;
+            }
+
+            #ui {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                background: rgba(0, 0, 0, 0.4);
+                padding: 10px 14px;
+                border-radius: 14px;
+                backdrop-filter: blur(8px);
+            }
+
+            button {
+                font-size: 18px;
+                padding: 8px 12px;
+                border-radius: 10px;
+                border: 0;
+                cursor: pointer;
+            }
+
+            #label {
+                color: #0af;
+                font-weight: bold;
+                min-width: 30px;
+                text-align: center;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="ui">
+            <button id="minus">−</button>
+            <button id="plus">+</button>
+            <button id="rotate">↻</button>
+            <div id="label">3</div>
+        </div>
+
+        <script>
+            let cam;
+            let facingMode = "environment";
+
+            // Fibonacci spiral state
+            let sp = {
+                anchorX: 0,
+                anchorY: 0,
+                size: 80,
+                count: 3,
+                dir: 0,
+                squares: [],
+            };
+
+            const DIRS = [
+                { dx: 1, dy: 0 }, // right
+                { dx: 0, dy: 1 }, // down
+                { dx: -1, dy: 0 }, // left
+                { dx: 0, dy: -1 }, // up
+            ];
+
+            function fib(n) {
+                const arr = [1, 1];
+                for (let i = 2; i < n; i++) arr[i] = arr[i - 1] + arr[i - 2];
+                return arr.slice(0, n);
+            }
+
+            function build() {
+                const sizes = fib(sp.count);
+
+                let squares = [];
+
+                // start center
+                let x = sp.anchorX;
+                let y = sp.anchorY;
+
+                squares.push({ x, y, size: sizes[0] });
+                if (sp.count === 1) return squares;
+
+                squares.push({
+                    x: x + sp.size,
+                    y: y,
+                    size: sizes[1],
+                });
+
+                let minX = Infinity,
+                    maxX = -Infinity,
+                    minY = Infinity,
+                    maxY = -Infinity;
+
+                function updateBounds(sq) {
+                    const s = sq.size;
+                    minX = Math.min(minX, sq.x - s);
+                    maxX = Math.max(maxX, sq.x + s);
+                    minY = Math.min(minY, sq.y - s);
+                    maxY = Math.max(maxY, sq.y + s);
+                }
+
+                updateBounds(squares[0]);
+                updateBounds(squares[1]);
+
+                let dirIndex = 1;
+
+                for (let i = 2; i < sizes.length; i++) {
+                    const s = sizes[i];
+                    const d = DIRS[dirIndex % 4];
+
+                    let last = squares[i - 1];
+
+                    let nx = last.x + (d.dx * (s + last.size)) / 2;
+                    let ny = last.y + (d.dy * (s + last.size)) / 2;
+
+                    const sq = { x: nx, y: ny, size: s };
+                    squares.push(sq);
+                    updateBounds(sq);
+
+                    dirIndex++;
+                }
+
+                // center + fit
+                const cx = (minX + maxX) / 2;
+                const cy = (minY + maxY) / 2;
+
+                const scale = Math.min(
+                    width / (maxX - minX + 200),
+                    height / (maxY - minY + 200),
+                );
+
+                for (const s of squares) {
+                    s.x = (s.x - cx) * scale + width / 2;
+                    s.y = (s.y - cy) * scale + height / 2;
+                    s.size *= scale;
+                }
+
+                sp.squares = squares;
+            }
+
+            function setup() {
+                createCanvas(windowWidth, windowHeight);
+
+                cam = createCapture({
+                    video: { facingMode },
+                    audio: false,
+                });
+                cam.hide();
+
+                sp.anchorX = width / 2;
+                sp.anchorY = height / 2;
+
+                build();
+            }
+
+            function draw() {
+                background(0);
+
+                if (cam) {
+                    push();
+                    if (facingMode === "user") {
+                        translate(width, 0);
+                        scale(-1, 1);
+                    }
+                    image(cam, 0, 0, width, height);
+                    pop();
+                }
+
+                // draw fib
+                noFill();
+                stroke(0, 170, 255);
+                strokeWeight(2);
+
+                for (const s of sp.squares) {
+                    rectMode(CENTER);
+                    rect(s.x, s.y, s.size, s.size);
+                }
+            }
+
+            function rebuild() {
+                sp.anchorX = width / 2;
+                sp.anchorY = height / 2;
+                build();
+                document.getElementById("label").innerText = sp.count;
+            }
+
+            // UI
+            document.getElementById("plus").onclick = () => {
+                sp.count++;
+                rebuild();
+            };
+
+            document.getElementById("minus").onclick = () => {
+                sp.count = Math.max(2, sp.count - 1);
+                rebuild();
+            };
+
+            document.getElementById("rotate").onclick = () => {
+                sp.dir = (sp.dir + 1) % 4;
+                build();
+            };
+
+            function windowResized() {
+                resizeCanvas(windowWidth, windowHeight);
+                rebuild();
+            }
+        </script>
+    </body>
+</html>
