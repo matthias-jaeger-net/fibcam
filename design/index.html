@@ -17,21 +17,6 @@
                 --border: 1px solid #ffffff55;
             }
 
-            button {
-                -webkit-appearance: none;
-                appearance: none;
-                -webkit-tap-highlight-color: transparent;
-                touch-action: manipulation;
-            }
-            .btn,
-            .shutter,
-            .settings-item {
-                -webkit-appearance: none;
-                appearance: none;
-                -webkit-tap-highlight-color: transparent;
-                touch-action: manipulation;
-            }
-
             * {
                 margin: 0;
                 padding: 0;
@@ -49,6 +34,23 @@
                 background: var(--bg);
                 color: var(--fg);
                 font-family: system-ui, sans-serif;
+            }
+
+            /* iOS FIX: remove native button styling + tap highlight */
+            button {
+                -webkit-appearance: none;
+                appearance: none;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+
+            .btn,
+            .shutter,
+            .settings-item {
+                -webkit-appearance: none;
+                appearance: none;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
             }
 
             /* ===== Layout ===== */
@@ -87,15 +89,16 @@
                 color: #ffffff66;
             }
 
-            /* ===== FLASH OVERLAY ===== */
+            /* FLASH EFFECT */
             .flash {
                 position: absolute;
                 inset: 0;
                 background: var(--accent);
                 opacity: 0;
                 pointer-events: none;
-                transition: opacity 0.15s ease;
+                transition: opacity 0.12s ease;
                 mix-blend-mode: screen;
+                z-index: 10;
             }
 
             .flash.active {
@@ -126,7 +129,6 @@
                 margin: auto;
                 width: 24px;
                 height: 24px;
-
                 background-color: currentColor;
 
                 mask: var(--icon) center / contain no-repeat;
@@ -139,9 +141,9 @@
             }
 
             .btn:active {
-                color: var(--accent);
-                border: var(--accent);
                 transform: scale(0.95);
+                color: var(--accent);
+                border-color: var(--accent);
             }
 
             /* ===== Shutter ===== */
@@ -157,7 +159,6 @@
 
             .shutter:active {
                 background: var(--accent);
-                transform: scale(1.1);
             }
 
             /* ===== ICONS ===== */
@@ -180,7 +181,7 @@
                 --icon: url("icons/camera-rotate.svg");
             }
 
-            /* ===== SETTINGS WRAPPER ===== */
+            /* ===== SETTINGS ===== */
             .settings-wrapper {
                 position: relative;
                 display: flex;
@@ -206,7 +207,6 @@
                 opacity: 0;
                 transform: translateY(10px);
                 pointer-events: none;
-
                 transition: 0.2s ease;
             }
 
@@ -307,7 +307,6 @@
             ></button>
         </div>
 
-        <!-- SCRIPT -->
         <script>
             const settingsBtn = document.querySelector(
                 '[data-action="settings"]',
@@ -319,26 +318,29 @@
             );
             const flash = document.getElementById("flash");
 
-            // toggle settings panel
+            // settings toggle
             settingsBtn.addEventListener("click", () => {
                 settingsBtn.classList.toggle("active");
                 panel.classList.toggle("open");
             });
 
-            // toggle settings items
+            // settings items toggle
             document.querySelectorAll("[data-toggle]").forEach((btn) => {
                 btn.addEventListener("click", () => {
                     btn.classList.toggle("active");
                 });
             });
 
-            // flash effect on shutter
-            shutterBtn.addEventListener("click", () => {
+            // flash helper
+            function triggerFlash() {
                 flash.classList.add("active");
+                setTimeout(() => flash.classList.remove("active"), 150);
+            }
 
-                setTimeout(() => {
-                    flash.classList.remove("active");
-                }, 150);
+            // click + iOS touch support
+            shutterBtn.addEventListener("click", triggerFlash);
+            shutterBtn.addEventListener("touchstart", triggerFlash, {
+                passive: true,
             });
         </script>
     </body>
