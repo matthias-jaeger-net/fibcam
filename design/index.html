@@ -17,6 +17,21 @@
                 --border: 1px solid #ffffff55;
             }
 
+            button {
+                -webkit-appearance: none;
+                appearance: none;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+            .btn,
+            .shutter,
+            .settings-item {
+                -webkit-appearance: none;
+                appearance: none;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+
             * {
                 margin: 0;
                 padding: 0;
@@ -142,6 +157,7 @@
 
             .shutter:active {
                 background: var(--accent);
+                transform: scale(1.1);
             }
 
             /* ===== ICONS ===== */
