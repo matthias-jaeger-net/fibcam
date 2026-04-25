@@ -36,7 +36,7 @@
                 font-family: system-ui, sans-serif;
             }
 
-            /* iOS FIX: remove native button styling + tap highlight */
+            /* iOS reliability layer */
             button {
                 -webkit-appearance: none;
                 appearance: none;
@@ -44,13 +44,11 @@
                 touch-action: manipulation;
             }
 
-            .btn,
-            .shutter,
-            .settings-item {
-                -webkit-appearance: none;
-                appearance: none;
-                -webkit-tap-highlight-color: transparent;
-                touch-action: manipulation;
+            /* prevent Safari hover/active bugs */
+            @media (hover: none) and (pointer: coarse) {
+                .btn:hover {
+                    background: var(--bg-interactive);
+                }
             }
 
             /* ===== Layout ===== */
@@ -89,7 +87,7 @@
                 color: #ffffff66;
             }
 
-            /* FLASH EFFECT */
+            /* FLASH */
             .flash {
                 position: absolute;
                 inset: 0;
@@ -106,20 +104,28 @@
             }
 
             /* ===== Base buttons ===== */
+            .btn,
+            .shutter,
+            .settings-item {
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
+
+                cursor: pointer;
+                position: relative;
+                transition: 0.15s ease;
+                -webkit-appearance: none;
+                appearance: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            /* ICON BUTTONS */
             .btn {
                 width: 42px;
                 height: 42px;
                 border-radius: 50%;
                 border: var(--border);
                 background: var(--bg-interactive);
-                cursor: pointer;
-                position: relative;
-                transition: 0.15s ease;
                 color: var(--fg);
-            }
-
-            .btn:hover {
-                background: var(--bg-interactive-hover);
             }
 
             .btn::before {
@@ -130,58 +136,43 @@
                 width: 24px;
                 height: 24px;
                 background-color: currentColor;
-
                 mask: var(--icon) center / contain no-repeat;
                 -webkit-mask: var(--icon) center / contain no-repeat;
             }
 
-            .btn.active {
-                color: var(--accent);
-                border-color: var(--accent);
+            .btn:hover {
+                background: var(--bg-interactive-hover);
             }
 
+            /* iOS-safe pressed state (JS-controlled) */
+            .pressed {
+                transform: scale(0.95);
+                background: var(--bg-interactive-hover);
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+            /* fallback */
             .btn:active {
                 transform: scale(0.95);
-                color: var(--accent);
                 border-color: var(--accent);
+                color: var(--accent);
             }
 
-            /* ===== Shutter ===== */
+            /* SHUTTER */
             .shutter {
                 width: 80px;
                 height: 80px;
                 border-radius: 50%;
                 border: var(--border);
                 background: var(--bg-interactive);
-                cursor: pointer;
-                transition: 0.15s ease;
             }
 
             .shutter:active {
                 background: var(--accent);
             }
 
-            /* ===== ICONS ===== */
-            .btn.increase-density {
-                --icon: url("icons/plus(1).svg");
-            }
-            .btn.decrease-density {
-                --icon: url("icons/minus.svg");
-            }
-            .btn.flip {
-                --icon: url("icons/flip-vertical.svg");
-            }
-            .btn.rotate {
-                --icon: url("icons/rotate-clockwise.svg");
-            }
-            .btn.settings {
-                --icon: url("icons/settings.svg");
-            }
-            .btn.switch-camera {
-                --icon: url("icons/camera-rotate.svg");
-            }
-
-            /* ===== SETTINGS ===== */
+            /* SETTINGS */
             .settings-wrapper {
                 position: relative;
                 display: flex;
@@ -192,15 +183,12 @@
             .settings-panel {
                 position: absolute;
                 bottom: 90px;
-
                 display: flex;
                 flex-direction: column;
                 gap: 10px;
-
                 padding: 12px;
                 border: var(--border);
                 border-radius: 999px;
-
                 background: #1f1f1fdd;
                 backdrop-filter: blur(10px);
 
@@ -222,8 +210,6 @@
                 border-radius: 50%;
                 border: var(--border);
                 background: var(--bg-interactive);
-                cursor: pointer;
-                position: relative;
                 color: var(--fg);
             }
 
@@ -234,9 +220,7 @@
                 margin: auto;
                 width: 22px;
                 height: 22px;
-
                 background-color: currentColor;
-
                 mask: var(--icon) center / contain no-repeat;
                 -webkit-mask: var(--icon) center / contain no-repeat;
             }
@@ -244,6 +228,26 @@
             .settings-item.active {
                 color: var(--accent);
                 border-color: var(--accent);
+            }
+
+            /* ICON MAPS */
+            .increase-density {
+                --icon: url("icons/plus(1).svg");
+            }
+            .decrease-density {
+                --icon: url("icons/minus.svg");
+            }
+            .flip {
+                --icon: url("icons/flip-vertical.svg");
+            }
+            .rotate {
+                --icon: url("icons/rotate-clockwise.svg");
+            }
+            .settings {
+                --icon: url("icons/settings.svg");
+            }
+            .switch-camera {
+                --icon: url("icons/camera-rotate.svg");
             }
 
             .grid {
@@ -261,16 +265,10 @@
     <body>
         <!-- TOP -->
         <div class="bar top-bar">
-            <button
-                class="btn decrease-density"
-                data-action="decrease-density"
-            ></button>
-            <button
-                class="btn increase-density"
-                data-action="increase-density"
-            ></button>
-            <button class="btn flip" data-action="flip"></button>
-            <button class="btn rotate" data-action="rotate"></button>
+            <button class="btn decrease-density" data-btn></button>
+            <button class="btn increase-density" data-btn></button>
+            <button class="btn flip" data-btn></button>
+            <button class="btn rotate" data-btn></button>
         </div>
 
         <!-- CAMERA -->
@@ -282,65 +280,61 @@
         <!-- BOTTOM -->
         <div class="bar bottom-bar">
             <div class="settings-wrapper">
-                <button class="btn settings" data-action="settings"></button>
+                <button class="btn settings" id="settingsBtn"></button>
 
                 <div class="settings-panel" id="settingsPanel">
-                    <button
-                        class="settings-item grid active"
-                        data-toggle="grid"
-                    ></button>
-                    <button
-                        class="settings-item spiral active"
-                        data-toggle="spiral"
-                    ></button>
-                    <button
-                        class="settings-item photo"
-                        data-toggle="photo"
-                    ></button>
+                    <button class="settings-item grid" data-toggle></button>
+                    <button class="settings-item spiral" data-toggle></button>
+                    <button class="settings-item photo" data-toggle></button>
                 </div>
             </div>
 
-            <button class="shutter" data-action="shutter"></button>
-            <button
-                class="btn switch-camera"
-                data-action="switch-camera"
-            ></button>
+            <button class="shutter" id="shutter"></button>
+            <button class="btn switch-camera" data-btn></button>
         </div>
 
         <script>
-            const settingsBtn = document.querySelector(
-                '[data-action="settings"]',
-            );
+            const flash = document.getElementById("flash");
+            const shutter = document.getElementById("shutter");
+
+            const settingsBtn = document.getElementById("settingsBtn");
             const panel = document.getElementById("settingsPanel");
 
-            const shutterBtn = document.querySelector(
-                '[data-action="shutter"]',
-            );
-            const flash = document.getElementById("flash");
+            /* ===== unified press system (fixes iOS :active bugs) ===== */
+            function press(el) {
+                el.classList.add("pressed");
+                setTimeout(() => el.classList.remove("pressed"), 120);
+            }
 
-            // settings toggle
+            document.querySelectorAll("[data-btn]").forEach((btn) => {
+                btn.addEventListener("touchstart", () => press(btn), {
+                    passive: true,
+                });
+                btn.addEventListener("mousedown", () => press(btn));
+            });
+
+            /* ===== shutter flash ===== */
+            function triggerFlash() {
+                flash.classList.add("active");
+                setTimeout(() => flash.classList.remove("active"), 140);
+            }
+
+            shutter.addEventListener("click", triggerFlash);
+            shutter.addEventListener("touchstart", triggerFlash, {
+                passive: true,
+            });
+
+            /* ===== settings panel ===== */
             settingsBtn.addEventListener("click", () => {
-                settingsBtn.classList.toggle("active");
+                settingsBtn.classList.toggle("pressed");
                 panel.classList.toggle("open");
             });
 
-            // settings items toggle
-            document.querySelectorAll("[data-toggle]").forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    btn.classList.toggle("active");
+            /* ===== toggle items ===== */
+            document.querySelectorAll("[data-toggle]").forEach((el) => {
+                el.addEventListener("click", () => {
+                    el.classList.toggle("active");
                 });
-            });
-
-            // flash helper
-            function triggerFlash() {
-                flash.classList.add("active");
-                setTimeout(() => flash.classList.remove("active"), 150);
-            }
-
-            // click + iOS touch support
-            shutterBtn.addEventListener("click", triggerFlash);
-            shutterBtn.addEventListener("touchstart", triggerFlash, {
-                passive: true,
             });
         </script>
     </body>
